@@ -1,9 +1,9 @@
 <?php
-// $Id: uc_2checkout.install,v 1.1.2.4 2010/07/12 01:57:43 tr Exp $
+// $Id: uc_securepayu.install,v 1.1.2.4 2010/07/12 01:57:43 tr Exp $
 
 /**
  * @file
- * Install file for uc_2checkout.module.
+ * Install file for uc_securepayu.module.
  */
 
 /**

@@ -71,14 +71,14 @@ function uc_securepayu_form_alter(&$form, $form_state, $form_id) {
  */
 function uc_securepayu_uc_payment_method() {
   $path = base_path() . drupal_get_path('module', 'uc_securepayu');
-  $title = variable_get('uc_uc_securepayu_method_title', t('Online Payment through PayUMoney:'));
-  $title .= '<br /><br /><img src="' . $path . '/logo.gif" style="position: relative; left: 2.5em;" />';
+  $title = variable_get('uc_uc_securepayu_method_title', t('Online Payment through '));
+  $title .= '<img class="uc-credit-cctype" typeof="Image" src="' . $path . '/logo.png" style="position: relative; left: 2.5em;" />';
 
   $methods[] = array(
       'id' => 'securepayu',
-      'name' => t('PayUMoney'),
+      'name' => t('PayUmoney'),
       'title' => $title,
-      'desc' => t('Redirect to PayUMoney to pay by credit card or netbanking.'),
+      'desc' => t('Redirect to PayUmoney to pay by credit card or netbanking.'),
       'callback' => 'uc_payment_uc_method_securepayu',
       'weight' => 3,
       'checkout' => TRUE,
@@ -218,25 +218,26 @@ function uc_securepayu_form($form, $form_state, $order) {
   $email = substr($order->primary_email, 0, 64);
   $phone = substr($order->billing_phone, 0, 16);
   
+  $udf5 = 'Ubercart_v_6.x-2.4';
+  
   $surl = url('cart/securepayu/complete/',array('absolute' => TRUE)). $order->order_id.'/DR={DR}';  
   $furl = url('cart/securepayu/complete/',array('absolute' => TRUE)). $order->order_id.'/DR={DR}';  
   $curl = url('cart/securepayu/complete/',array('absolute' => TRUE)). $order->order_id.'/DR={DR}';  
   
-  
-  $key='JBZaLc';$salt='GQs7yium';//$txnid='12312429874654';
-  $pg = isset($_SESSION['pay_method']) ? $_SESSION['pay_method'] : 'CC';
-  $string = $key . '|' . $txnid . '|' . $amount . '|' . $productinfo . '|' . $firstname . '|' . $email . '|||||||||||' . $salt;
+  //$pg = isset($_SESSION['pay_method']) ? $_SESSION['pay_method'] : 'CC';
+  $pg = 'CC';
+  $string = $key . '|' . $txnid . '|' . $amount . '|' . $productinfo . '|' . $firstname . '|' . $email . '|||||'.$udf5.'||||||' . $salt;
   $hash = strtolower(hash('sha512', $string));
   $data = array(
       'key' => $key,
       'txnid' => $txnid,
-	  'service_provider' => 'payu_paisa',
+	  'amount' => $amount,
+	  'productinfo' => $productinfo,	  
       'firstname' => $firstname,
       'lastname' => $lastname,
       'address1' => $address1,
       'address2' => $address2,
-      'productinfo' => $productinfo,
-      'amount' => $amount,
+      'service_provider' => 'payu_paisa',      
       'zipcode' => $zipcode,
       'city' => $city,
       'state' => $state,
@@ -246,7 +247,8 @@ function uc_securepayu_form($form, $form_state, $order) {
       'surl' => $surl,
       'furl' => $furl,
       'curl' => $curl,
-      'pg' => $pg,
+      'Pg' => $pg,
+	  'udf5' => $udf5,
       'hash' => $hash
   );
   $form['#action'] = _securepayu_post_url(variable_get('uc_securepayu_checkout_mode', 'TEST'));
@@ -269,7 +271,6 @@ function _securepayu_post_url($type) {
 
   if ($type == 'LIVE')
     return 'https://secure.payu.in/_payment.php';
-
   else
-    return 'https://test.payu.in/_payment.php';
+    return 'https://sandboxsecure.payu.in/_payment.php';
 }
